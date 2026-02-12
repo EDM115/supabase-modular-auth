@@ -1,7 +1,9 @@
 {
   "name": "supabase-modular-auth",
   "version": "1.0.0",
+  "private": true,
   "license": "ISC",
+  "type": "module",
   "scripts": {
     "build": "pnpm -r --parallel build",
     "dev": "pnpm -r --parallel dev",
@@ -12,6 +14,6 @@
     "type-check": "pnpm -r --parallel type-check"
   },
   "devDependencies": {
-    "oxfmt": "^0.21.0"
+    "oxfmt": "^0.32.0"
   }
 }

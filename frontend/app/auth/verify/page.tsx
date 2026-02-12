@@ -19,6 +19,23 @@ function parseVerificationHash(): VerifyResult {
     return { status: "loading", errorMessage: "" };
   }
 
+  // Supabase may return verification data in query params (PKCE/code flow)
+  const query = new URLSearchParams(window.location.search);
+  const queryCode = query.get("code");
+  const queryError = query.get("error");
+  const queryErrorDescription = query.get("error_description");
+
+  if (queryError) {
+    return {
+      status: "error",
+      errorMessage: queryErrorDescription || queryError || "Verification failed.",
+    };
+  }
+
+  if (queryCode) {
+    return { status: "success", errorMessage: "" };
+  }
+
   const hash = window.location.hash;
 
   if (!hash) {

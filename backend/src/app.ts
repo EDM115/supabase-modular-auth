@@ -117,12 +117,10 @@ class App {
     this.app.use(
       cors({
         origin: (origin, callback) => {
-          // Allow requests with no origin (like mobile apps or Postman) in development only
+          // Allow requests with no origin (top-level navigations, health checks, server-to-server requests)
+          // Browsers only enforce CORS on cross-origin XHR/fetch; blocking no-origin breaks OAuth callbacks.
           if (!origin) {
-            if (config.NODE_ENV === "development") {
-              return callback(null, true);
-            }
-            return callback(new Error("CORS: Origin required"));
+            return callback(null, true);
           }
 
           if (allowedOrigins.includes(origin)) {

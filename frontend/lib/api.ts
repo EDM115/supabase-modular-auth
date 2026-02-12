@@ -6,7 +6,7 @@ import type {
   GoogleAuthUrlResponseData,
 } from "@supabase-modular-auth/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 const CSRF_COOKIE_NAME = "csrf_token";
 
 // Re-export types for convenience
@@ -91,7 +91,7 @@ async function fetchAPI<T = unknown>(
   endpoint: string,
   options?: RequestInit,
 ): Promise<ApiResponse<T>> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = API_BASE_URL ? `${API_BASE_URL}${endpoint}` : endpoint;
   const method = options?.method?.toUpperCase() || "GET";
 
   // Build headers with CSRF token for non-GET requests

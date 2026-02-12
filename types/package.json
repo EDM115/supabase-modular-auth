@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "dev": "tsc --watch",
     "lint": "oxlint --type-aware .",
     "lint:fix": "oxlint --fix --type-aware .",

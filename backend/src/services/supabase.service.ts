@@ -27,6 +27,7 @@ class SupabaseService {
           autoRefreshToken: false,
           persistSession: false,
           detectSessionInUrl: false,
+          flowType: "pkce",
         },
       });
     }
@@ -54,6 +55,7 @@ class SupabaseService {
             autoRefreshToken: false,
             persistSession: false,
             detectSessionInUrl: false,
+            flowType: "pkce",
           },
         },
       );
@@ -82,6 +84,7 @@ class SupabaseService {
         autoRefreshToken: false,
         persistSession: false,
         detectSessionInUrl: false,
+        flowType: "pkce",
       },
     });
   }
