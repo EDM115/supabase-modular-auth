@@ -28,6 +28,8 @@ Frontend for the authentication API using Next.js 14 App Router. Keep UX minimal
 ## Environment
 
 - `NEXT_PUBLIC_API_BASE_URL` is the only required variable for API calls.
+- **Optional**: `FRONTEND_PROXY_TARGET` enables same-origin proxying for Safari-friendly cookies.
+- When using proxying, set `NEXT_PUBLIC_API_BASE_URL` to empty/undefined to use relative `/auth/*` paths.
 - Always send `credentials: 'include'` on fetch to carry cookies.
 
 ## Security Rules
@@ -44,11 +46,16 @@ Frontend for the authentication API using Next.js 14 App Router. Keep UX minimal
   - POST `/auth/register` with JSON body.
   - On success: show "Check your email to verify"; stay on page.
 
+- `/auth/verify`
+  - Handles Supabase verification redirects.
+  - Supports both callback formats: query code (`?code=...`) and hash token (`#access_token=...`).
+
 - `/login`
   - Form: email, password.
   - POST `/auth/login` with credentials included.
   - On success: redirect to `/dashboard`.
   - Do not assume success without backend response.
+  - Google OAuth: call `GET /auth/google/url` and redirect to the returned URL.
 
 - `/forgot-password`
   - Form: email.
@@ -72,9 +79,19 @@ Frontend for the authentication API using Next.js 14 App Router. Keep UX minimal
 ## API Usage Patterns
 
 - All requests: `credentials: 'include'` and `Content-Type: application/json` for POST bodies.
+- When using `FRONTEND_PROXY_TARGET`, call `/auth/*` relative routes so cookies remain first-party.
 - Never reuse cached auth state; rely on fresh `/auth/me` when rendering protected areas.
 - Handle rate-limit responses generically ("Please try again later").
 - Prefer `AbortController` for in-flight requests when navigating away.
+
+### Google OAuth Example
+
+```ts
+const response = await api.getGoogleAuthUrl();
+if (response.success && response.data?.url) {
+  window.location.href = response.data.url;
+}
+```
 
 ## UX States
 
@@ -88,6 +105,14 @@ Frontend for the authentication API using Next.js 14 App Router. Keep UX minimal
   - Login: if `EMAIL_NOT_VERIFIED`, prompt to verify email.
   - Others: "Something went wrong. Please try again."
 - On network failure: "Cannot reach server. Please try again."
+
+## Safari & Cross-Site Cookies
+
+Safari blocks many third-party cookies. If frontend and backend are on **different sites**, HttpOnly cookies may not be stored.
+
+**Recommended approach:** set `FRONTEND_PROXY_TARGET` and use relative `/auth/*` calls to keep cookies first-party.
+
+If you must stay cross-site, configure backend cookies with `SameSite=None` and `Secure` (HTTPS). Safari may still block them.
 
 ## Folder Notes
 

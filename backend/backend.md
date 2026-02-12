@@ -43,7 +43,7 @@ http://localhost:3000
 {
   "success": true,
   "message": "Operation successful",
-  "data": { }
+  "data": {}
 }
 ```
 
@@ -420,6 +420,8 @@ The `auth_token` cookie is set with:
 - `domain`: Configured via environment
 - `path: /`
 
+**Safari note:** If frontend and backend are on different sites, set `COOKIE_SAME_SITE=none` and `CSRF_COOKIE_SAME_SITE=none` with `COOKIE_SECURE=true` (HTTPS). Safari may still block third‑party cookies; prefer same-site proxying.
+
 ### Rate Limiting
 
 **Global Rate Limit**
@@ -488,6 +490,13 @@ The `auth_token` cookie is set with:
 7. Backend redirects to frontend dashboard
 8. User is authenticated
 
+**Setup checklist:**
+
+- Enable Google provider in Supabase Auth settings.
+- In Google Cloud OAuth client, set redirect URI to: `https://<your-project-ref>.supabase.co/auth/v1/callback`.
+- In Supabase Auth URL configuration, allow: `${BACKEND_URL}/auth/google/callback`.
+- Set `BACKEND_URL` in backend env for production.
+
 ---
 
 ## Frontend Integration
@@ -496,19 +505,19 @@ The `auth_token` cookie is set with:
 
 ```javascript
 // Cookies are sent automatically
-fetch('http://localhost:3000/auth/me', {
-  credentials: 'include' // Required for cookies
-})
+fetch("http://localhost:3000/auth/me", {
+  credentials: "include", // Required for cookies
+});
 ```
 
 ### Handling Errors
 
 ```javascript
-const response = await fetch('http://localhost:3000/auth/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  credentials: 'include',
-  body: JSON.stringify({ email, password })
+const response = await fetch("http://localhost:3000/auth/login", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify({ email, password }),
 });
 
 const data = await response.json();
@@ -516,14 +525,14 @@ const data = await response.json();
 if (!data.success) {
   // Handle error based on error code
   switch (data.error) {
-    case 'EMAIL_NOT_VERIFIED':
+    case "EMAIL_NOT_VERIFIED":
       // Show verification reminder
       break;
-    case 'AUTH_FAILED':
+    case "AUTH_FAILED":
       // Show invalid credentials message
       break;
     default:
-      // Show generic error
+    // Show generic error
   }
 }
 ```
@@ -532,7 +541,7 @@ if (!data.success) {
 
 ```javascript
 // Get OAuth URL
-const response = await fetch('http://localhost:3000/auth/google/url');
+const response = await fetch("http://localhost:3000/auth/google/url");
 const { data } = await response.json();
 
 // Redirect user to Google
@@ -604,11 +613,11 @@ backend/
 
 ### Optional - Server
 
-| Variable      | Description             | Default       |
-| ------------- | ----------------------- | ------------- |
-| `PORT`        | Server port             | `3000`        |
-| `NODE_ENV`    | Environment mode        | `development` |
-| `BACKEND_URL` | Backend URL (for OAuth) | -             |
+| Variable      | Description                                       | Default       |
+| ------------- | ------------------------------------------------- | ------------- |
+| `PORT`        | Server port                                       | `3000`        |
+| `NODE_ENV`    | Environment mode                                  | `development` |
+| `BACKEND_URL` | Backend URL (required for Google OAuth callbacks) | -             |
 
 ### Optional - Cookies
 
@@ -619,6 +628,13 @@ backend/
 | `COOKIE_SECURE`       | Use secure cookies (HTTPS) | `false`      |
 | `COOKIE_SAME_SITE`    | SameSite attribute         | `lax`        |
 | `COOKIE_MAX_AGE_DAYS` | Cookie expiration (days)   | `7`          |
+
+### Optional - CSRF Cookie
+
+| Variable                | Description                                          | Default  |
+| ----------------------- | ---------------------------------------------------- | -------- |
+| `CSRF_COOKIE_SAME_SITE` | SameSite for CSRF cookie                             | `strict` |
+| `CSRF_COOKIE_SECURE`    | Secure flag for CSRF cookie (inherits COOKIE_SECURE) | -        |
 
 ### Optional - Rate Limiting
 

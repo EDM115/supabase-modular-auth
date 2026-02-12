@@ -30,8 +30,8 @@ const tokensMatch = (a: string, b: string): boolean => {
 const setCsrfCookie = (res: Response, token: string): void => {
   res.cookie(CSRF_COOKIE_NAME, token, {
     httpOnly: false,
-    secure: config.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: config.CSRF_COOKIE_SECURE ?? config.COOKIE_SECURE,
+    sameSite: config.CSRF_COOKIE_SAME_SITE || "strict",
     path: "/",
     maxAge: 24 * 60 * 60 * 1000,
   });

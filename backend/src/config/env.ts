@@ -28,6 +28,13 @@ const envSchema = z.object({
   COOKIE_SAME_SITE: z.enum(["strict", "lax", "none"]).default("lax"),
   COOKIE_MAX_AGE_DAYS: z.string().regex(/^\d+$/).transform(Number).optional().default(7),
 
+  // CSRF Cookie (can differ from auth cookie for cross-site setups)
+  CSRF_COOKIE_SAME_SITE: z.enum(["strict", "lax", "none"]).optional().default("strict"),
+  CSRF_COOKIE_SECURE: z
+    .string()
+    .transform((val) => val === "true")
+    .optional(),
+
   // Rate Limiting
   RATE_LIMIT_WINDOW_MS: z.string().regex(/^\d+$/).transform(Number).optional().default(900000), // 15 minutes
   RATE_LIMIT_MAX_REQUESTS: z.string().regex(/^\d+$/).transform(Number).optional().default(100), // General endpoints
@@ -77,6 +84,10 @@ try {
       errors.push("COOKIE_SECURE must be true in production (HTTPS required)");
     }
 
+    if (config.CSRF_COOKIE_SECURE === false) {
+      warnings.push("CSRF_COOKIE_SECURE is false in production; this may break Safari");
+    }
+
     if (config.COOKIE_SAME_SITE === "none") {
       warnings.push(
         'COOKIE_SAME_SITE is set to "none" - ensure this is intentional for cross-site requests',
@@ -111,6 +122,11 @@ try {
       console.error("❌ Refusing to start with insecure configuration in production");
       process.exit(1);
     }
+  }
+
+  // Inherit CSRF cookie secure flag from auth cookie if not explicitly set
+  if (config.CSRF_COOKIE_SECURE === undefined) {
+    config.CSRF_COOKIE_SECURE = config.COOKIE_SECURE;
   }
 
   // Development info

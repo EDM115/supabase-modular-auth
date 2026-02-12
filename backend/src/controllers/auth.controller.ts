@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { randomBytes } from "crypto";
 import SupabaseService from "../services/supabase.service.js";
 import lockoutService from "../services/lockout.service.js";
 import {
@@ -18,57 +17,24 @@ import {
 import * as SecurityLogger from "../utils/logger.js";
 import config from "../config/env.js";
 
-// OAuth state store (in production, use Redis or database)
-const oauthStateStore = new Map<string, { expires: Date; ip?: string }>();
-
-// Clean up expired OAuth states periodically
-setInterval(() => {
-  const now = new Date();
-  for (const [state, data] of oauthStateStore.entries()) {
-    if (data.expires < now) {
-      oauthStateStore.delete(state);
-    }
-  }
-}, 60000); // Every minute
-
-/**
- * Generate a secure OAuth state parameter
- */
-const generateOAuthState = (ip?: string): string => {
-  const state = randomBytes(32).toString("base64url");
-  oauthStateStore.set(state, {
-    expires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
-    ip,
-  });
-  return state;
-};
-
-/**
- * Validate OAuth state parameter
- */
-const validateOAuthState = (state: string, _ip?: string): boolean => {
-  const data = oauthStateStore.get(state);
-  if (!data) {
-    return false;
-  }
-
-  oauthStateStore.delete(state); // One-time use
-
-  if (data.expires < new Date()) {
-    return false;
-  }
-
-  // Optional: Verify IP matches (may cause issues with mobile networks)
-  /*
-  if (ip && data.ip && data.ip !== ip) {
-    return false;
-  }
-  */
-
-  return true;
-};
-
 export class AuthController {
+  /**
+   * Infer the public backend base URL from proxy headers when BACKEND_URL is not set.
+   * This prevents localhost callbacks in hosted environments.
+   */
+  private getRequestBaseUrl(req: Request): string | null {
+    const forwardedProto = req.get("x-forwarded-proto")?.split(",")[0]?.trim();
+    const forwardedHost = req.get("x-forwarded-host")?.split(",")[0]?.trim();
+    const host = forwardedHost || req.get("host");
+
+    if (!host) {
+      return null;
+    }
+
+    const proto = forwardedProto || req.protocol || "https";
+    return `${proto}://${host}`;
+  }
+
   /**
    * POST /auth/register
    * Register a new user with email and password
@@ -481,17 +447,24 @@ export class AuthController {
    */
   async getGoogleAuthUrl(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const redirectBase = config.BACKEND_URL || this.getRequestBaseUrl(req);
+
+      if (!redirectBase) {
+        throw new AuthError(
+          "Google OAuth requires BACKEND_URL to be set.",
+          ErrorCode.INVALID_INPUT,
+        );
+      }
+
       const supabase = SupabaseService.getClient();
-      const state = generateOAuthState(req.ip);
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${config.BACKEND_URL || `http://localhost:${config.PORT}`}/auth/google/callback`,
+          redirectTo: `${redirectBase}/auth/google/callback`,
           queryParams: {
             access_type: "offline",
             prompt: "consent",
-            state, // CSRF protection
           },
         },
       });
@@ -519,19 +492,12 @@ export class AuthController {
     const frontendErrorUrl = `${config.FRONTEND_URL}/auth/error`;
 
     try {
-      const { code, state, error: oauthError } = req.query;
+      const { code, error: oauthError } = req.query;
 
       // Handle OAuth errors from provider
       if (oauthError) {
         SecurityLogger.logSecurityEvent("OAUTH_ERROR", req, { error: oauthError });
         res.redirect(`${frontendErrorUrl}?error=oauth_denied`);
-        return;
-      }
-
-      // Validate state parameter (CSRF protection)
-      if (!state || typeof state !== "string" || !validateOAuthState(state, req.ip)) {
-        SecurityLogger.logSecurityEvent("OAUTH_INVALID_STATE", req);
-        res.redirect(`${frontendErrorUrl}?error=invalid_state`);
         return;
       }
 

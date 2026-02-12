@@ -4,15 +4,15 @@ packages:
   - types
 
 catalog:
-  "@types/node": ^20
-  oxlint: "^1.35.0"
-  oxlint-tsgolint: "^0.10.0"
-  typescript: ^5
-  zod: ^4.2.1
+  "@types/node": ^20.19.33
+  oxlint: "^1.47.0"
+  oxlint-tsgolint: "^0.12.1"
+  typescript: ^5.9.3
+  zod: ^4.3.6
 
 lockfileIncludeTarballUrl: true
 
-onlyBuiltDependencies:
-  - esbuild
-  - sharp
-  - unrs-resolver
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true

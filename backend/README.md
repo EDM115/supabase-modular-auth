@@ -43,12 +43,16 @@ FRONTEND_URL=http://localhost:3001
 # Optional - Server
 PORT=3000
 NODE_ENV=development
+# Backend URL (Required for Google OAuth callbacks)
 BACKEND_URL=http://localhost:3000
 
 # Optional - Cookies
 COOKIE_NAME=auth_token
 COOKIE_SECURE=false
 COOKIE_SAME_SITE=lax
+CSRF_COOKIE_SAME_SITE=strict
+# If unset, inherits COOKIE_SECURE
+# CSRF_COOKIE_SECURE=true
 COOKIE_MAX_AGE_DAYS=7
 
 # Optional - Rate Limiting
