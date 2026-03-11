@@ -181,19 +181,18 @@ See `backend/.env.example` for the canonical list.
 - `pnpm dev` — run backend + frontend in parallel
 - `pnpm build` — build all packages
 - `pnpm lint` — lint all packages
+- `pnpm format` — format all packages
 - `pnpm type-check` — typecheck all packages
 
 ### Backend
 
 - `pnpm --filter @supabase-modular-auth/backend dev`
 - `pnpm --filter @supabase-modular-auth/backend build`
-- `pnpm --filter @supabase-modular-auth/backend lint`
 
 ### Frontend
 
 - `pnpm --filter @supabase-modular-auth/frontend dev`
 - `pnpm --filter @supabase-modular-auth/frontend build`
-- `pnpm --filter @supabase-modular-auth/frontend lint`
 
 ---
 

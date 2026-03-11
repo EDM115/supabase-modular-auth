@@ -1,8 +1,9 @@
-import { Request, Response, NextFunction } from "express";
-import { AuthError } from "../utils/errors.js";
-import { clearAuthCookie, getAuthTokenFromCookies } from "../utils/response.js";
+import type { Request, Response, NextFunction } from "express";
+
 import SupabaseService from "../services/supabase.service.js";
+import { AuthError } from "../utils/errors.js";
 import * as SecurityLogger from "../utils/logger.js";
+import { clearAuthCookie, getAuthTokenFromCookies } from "../utils/response.js";
 
 export interface AuthenticatedRequest extends Request {
   user?: {

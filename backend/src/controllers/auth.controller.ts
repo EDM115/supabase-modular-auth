@@ -1,21 +1,22 @@
-import { Request, Response, NextFunction } from "express";
-import SupabaseService from "../services/supabase.service.js";
+import type { Request, Response, NextFunction } from "express";
+
+import config from "../config/env.js";
 import lockoutService from "../services/lockout.service.js";
-import {
-  registerSchema,
-  loginSchema,
-  forgotPasswordSchema,
-  resetPasswordSchema,
-} from "../validators/auth.validator.js";
+import SupabaseService from "../services/supabase.service.js";
 import { AuthError, EmailNotVerifiedError, ValidationError, ErrorCode } from "../utils/errors.js";
+import * as SecurityLogger from "../utils/logger.js";
 import {
   setAuthCookie,
   clearAuthCookie,
   successResponse,
   getAuthTokenFromCookies,
 } from "../utils/response.js";
-import * as SecurityLogger from "../utils/logger.js";
-import config from "../config/env.js";
+import {
+  registerSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "../validators/auth.validator.js";
 
 export class AuthController {
   /**

@@ -1,13 +1,14 @@
-import express, { Application, Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
-import helmet from "helmet";
 import cors from "cors";
+import express, { type Application, type Request, type Response, type NextFunction } from "express";
 import { rateLimit, ipKeyGenerator } from "express-rate-limit";
+import helmet from "helmet";
+
 import config from "./config/env.js";
-import authRoutes from "./routes/auth.routes.js";
 import { csrfProtection } from "./middleware/csrf.middleware.js";
 import { errorHandler, notFoundHandler } from "./middleware/error.middleware.js";
 import { requestIdMiddleware } from "./middleware/request-id.middleware.js";
+import authRoutes from "./routes/auth.routes.js";
 import * as SecurityLogger from "./utils/logger.js";
 
 /**
