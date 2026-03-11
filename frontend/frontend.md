@@ -1,29 +1,8 @@
-Frontend for the authentication API using Next.js 16 App Router. Keep UX minimal, secure, and driven entirely by backend responses.
-
-## Table of Contents
-
-- Overview
-- Tech Stack
-- Environment
-- Security Rules
-- Pages & Behaviors
-- API Usage Patterns
-- UX States
-- Error Handling
-- Folder Notes
-
 ## Overview
 
 - Frontend is a thin client: no Supabase client, no token parsing, no local auth state beyond backend responses.
 - All authentication happens on the backend; cookies are HttpOnly and managed server-side.
 - Always treat backend as the source of truth for logged-in state.
-
-## Tech Stack
-
-- Next.js 16 (App Router)
-- TypeScript
-- Tailwind CSS
-- Fetch API (no Supabase client)
 
 ## Environment
 
@@ -32,14 +11,14 @@ Frontend for the authentication API using Next.js 16 App Router. Keep UX minimal
 - When using proxying, set `NEXT_PUBLIC_API_BASE_URL` to empty/undefined to use relative `/auth/*` paths.
 - Always send `credentials: 'include'` on fetch to carry cookies.
 
-## Security Rules
+## Security rules
 
 - Never call Supabase directly; only talk to the backend API.
 - Never store tokens in localStorage/sessionStorage; rely on HttpOnly cookies.
 - Do not decode/inspect JWTs; trust backend responses.
 - Redirect to `/login` on `401` from protected calls.
 
-## Pages & Behaviors
+## Pages & behaviors
 
 - `/register`
   - Form: email, password.
@@ -89,7 +68,7 @@ Frontend for the authentication API using Next.js 16 App Router. Keep UX minimal
   - POST `/auth/logout` with credentials.
   - On success: redirect to `/login` and clear local UI state.
 
-## API Usage Patterns
+## API usage patterns
 
 - All requests: `credentials: 'include'` and `Content-Type: application/json` for POST bodies.
 - When using `FRONTEND_PROXY_TARGET`, call `/auth/*` relative routes so cookies remain first-party.
@@ -98,38 +77,31 @@ Frontend for the authentication API using Next.js 16 App Router. Keep UX minimal
 - Prefer `AbortController` for in-flight requests when navigating away.
 - Be resilient to malformed/non-JSON responses from upstreams; fallback to safe generic errors.
 
-### Google OAuth Example
-
-```ts
-const response = await api.getGoogleAuthUrl();
-if (response.success && response.data?.url) {
-  window.location.href = response.data.url;
-}
-```
-
-## UX States
+## UX states
 
 - Each form needs: idle, loading (disable submit), success message, generic error message.
 - Show inline validation only for obvious client issues (e.g., empty fields); defer canonical errors to server.
 - Keep layouts minimal and readable; avoid storing any auth data client-side.
 - Keep form controls keyboard-accessible (excluding password visibility toggles) and expose input error state via `aria-invalid` + `aria-describedby`.
 
-## Error Handling
+## Error handling
 
 - Do not branch on specific error codes for UI copy; use generic friendly errors except where flows demand specifics:
   - Login: if `EMAIL_NOT_VERIFIED`, prompt to verify email.
   - Others: "Something went wrong. Please try again."
 - On network failure: "Cannot reach server. Please try again."
 
-## Safari & Cross-Site Cookies
+## Safari & Cross-Site cookies
 
 Safari blocks many third-party cookies. If frontend and backend are on **different sites**, HttpOnly cookies may not be stored.
 
 **Recommended approach:** set `FRONTEND_PROXY_TARGET` and use relative `/auth/*` calls to keep cookies first-party.
 
+When using the proxy, set `NEXT_PUBLIC_API_BASE_URL` to an empty string (or omit it) so the client calls relative paths.
+
 If you must stay cross-site, configure backend cookies with `SameSite=None` and `Secure` (HTTPS). Safari may still block them.
 
-## Folder Notes
+## Folder notes
 
 - App routes live in `app/` per Next.js App Router conventions.
 - Shared fetch helpers belong in `lib/api.ts`.
