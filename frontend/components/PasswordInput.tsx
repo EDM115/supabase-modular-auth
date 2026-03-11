@@ -56,6 +56,10 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     const hasError = !!error || showMismatch;
     const borderColor = hasError ? "border-red-500" : "border-gray-300";
     const focusRing = hasError ? "focus:ring-red-500" : "focus:ring-blue-500";
+    const inputId = props.id;
+    const errorId = inputId ? `${inputId}-error` : undefined;
+    const mismatchId = inputId ? `${inputId}-mismatch` : undefined;
+    const describedBy = error ? errorId : showMismatch ? mismatchId : undefined;
 
     return (
       <div>
@@ -68,7 +72,10 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         <div className="relative">
           <input
             ref={ref}
+            id={inputId}
             type={showPassword ? "text" : "password"}
+            aria-invalid={hasError}
+            aria-describedby={describedBy}
             className={`w-full border px-3 py-2 pr-10 ${borderColor} rounded-md focus:ring-2 focus:outline-none ${focusRing} ${className}`}
             {...props}
           />
@@ -82,7 +89,22 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             {showPassword ? <EyeOffIcon /> : <EyeIcon />}
           </button>
         </div>
-        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+        {error && (
+          <p
+            id={errorId}
+            className="mt-1 text-sm text-red-600"
+          >
+            {error}
+          </p>
+        )}
+        {!error && showMismatch && (
+          <p
+            id={mismatchId}
+            className="mt-1 text-sm text-red-600"
+          >
+            Passwords do not match.
+          </p>
+        )}
       </div>
     );
   },

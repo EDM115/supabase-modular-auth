@@ -8,6 +8,7 @@ import config from "./config/env.js";
 import { csrfProtection } from "./middleware/csrf.middleware.js";
 import { errorHandler, notFoundHandler } from "./middleware/error.middleware.js";
 import { requestIdMiddleware } from "./middleware/request-id.middleware.js";
+import adminRoutes from "./routes/admin.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import * as SecurityLogger from "./utils/logger.js";
 
@@ -41,6 +42,13 @@ class App {
   private initializeMiddlewares(): void {
     // Request ID tracking - first, so all logs have correlation ID
     this.app.use(requestIdMiddleware);
+
+    // Trust proxy configuration for correct IP detection
+    // Must be set before any middleware that relies on req.ip (rate limiters, security logging)
+    // Be careful with this setting - see https://expressjs.com/en/guide/behind-proxies.html
+    if (config.TRUST_PROXY !== false) {
+      this.app.set("trust proxy", config.TRUST_PROXY);
+    }
 
     // Request timeout to prevent slow loris attacks
     this.app.use((req: Request, res: Response, next: NextFunction) => {
@@ -162,12 +170,6 @@ class App {
     // Must come after cookie parser
     this.app.use(csrfProtection);
 
-    // Trust proxy configuration for correct IP detection
-    // Be careful with this setting - see https://expressjs.com/en/guide/behind-proxies.html
-    if (config.TRUST_PROXY !== false) {
-      this.app.set("trust proxy", config.TRUST_PROXY);
-    }
-
     // Per-IP rate limiter (each IP gets separate quota)
     const globalRateLimiter = rateLimit({
       windowMs: config.RATE_LIMIT_WINDOW_MS,
@@ -216,6 +218,7 @@ class App {
 
     // API routes
     this.app.use("/auth", authRoutes);
+    this.app.use("/admin", adminRoutes);
 
     // 404 handler
     this.app.use(notFoundHandler);

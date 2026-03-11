@@ -1,6 +1,6 @@
 # Authentication Frontend
 
-A Next.js 14 authentication frontend that communicates with a backend API.
+A Next.js 16 authentication frontend that communicates with a backend API.
 
 ## Features
 
@@ -11,6 +11,7 @@ A Next.js 14 authentication frontend that communicates with a backend API.
 - ✅ Protected Dashboard
 - ✅ Logout Functionality
 - ✅ HttpOnly Cookie-based Authentication
+- ✅ Admin Panel (`/admin`) with user management and audit logs
 
 ## Setup
 
@@ -52,6 +53,9 @@ The app will be available at `http://localhost:3001`
 - `/forgot-password` - Request password reset
 - `/reset-password` - Reset password with token
 - `/dashboard` - Protected user dashboard
+- `/admin` - Admin panel home (admin only)
+- `/admin/users` - User management (admin only)
+- `/admin/audit` - Admin audit logs (admin only)
 - `/logout` - Logout and redirect to login
 
 ## Security Features
@@ -64,7 +68,7 @@ The app will be available at `http://localhost:3001`
 
 ## Tech Stack
 
-- Next.js 14 (App Router)
+- Next.js 16 (App Router)
 - TypeScript
 - Tailwind CSS
 - Fetch API
@@ -84,6 +88,7 @@ if (response.success && response.data?.url) {
 - All authentication is handled by the backend API
 - Always use `credentials: 'include'` in fetch requests
 - Auth state is determined by API responses only
+- Admin UI relies on `/auth/me` returning `is_admin` in the user payload
 
 ## Safari & Cross-Site Cookies
 

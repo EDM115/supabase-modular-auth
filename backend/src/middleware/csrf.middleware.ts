@@ -42,11 +42,15 @@ const setCsrfCookie = (res: Response, token: string): void => {
 
 const EXCLUDED_ROUTES = ["/auth/google/callback", "/health"];
 
+const isExcludedRoute = (path: string): boolean => {
+  return EXCLUDED_ROUTES.some((route) => path === route || path.startsWith(`${route}/`));
+};
+
 export const csrfProtection: RequestHandler = (req, res, next): void => {
   const method = req.method.toUpperCase();
   const path = req.path;
 
-  if (EXCLUDED_ROUTES.some((route) => path.startsWith(route))) {
+  if (isExcludedRoute(path)) {
     next();
     return;
   }

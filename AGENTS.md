@@ -79,8 +79,8 @@ Key backend chain: **Middleware → Routes → Controllers → Services → Supa
 
 ### OAuth State Storage
 
-- OAuth `state` stored in-memory (`Map`) with 10-minute expiry.
-- In production, replace with Redis or a durable store.
+- OAuth `state` is handled by Supabase for the hosted OAuth flow.
+- Do not override `state` manually in `queryParams`, as it can break callback validation.
 
 ---
 
@@ -128,6 +128,21 @@ Backend uses **stronger password checks** (`zxcvbn` score >= 3) in `backend/src/
 ### Protected
 
 - `GET /auth/me`
+- `GET /admin/users`
+- `GET /admin/users/:id`
+- `POST /admin/users/create`
+- `POST /admin/users/:id/update`
+- `POST /admin/users/:id/delete`
+- `POST /admin/users/:id/ban`
+- `POST /admin/users/:id/unban`
+- `POST /admin/users/bulk`
+- `GET /admin/audit-logs`
+
+### Admin Authorization
+
+- Admin access is enforced server-side via Supabase `app_metadata`.
+- A user is considered admin when `app_metadata.role === "admin"` or `app_metadata.is_admin === true`.
+- Never trust client-side role flags for authorization.
 
 ### Response Shape
 

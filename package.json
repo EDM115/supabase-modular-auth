@@ -8,8 +8,8 @@
     "build": "pnpm -r --parallel build",
     "dev": "pnpm -r --parallel dev",
     "format": "oxfmt",
-    "lint": "oxlint .",
-    "lint:fix": "oxlint --fix .",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
     "start": "pnpm -r --parallel start",
     "type-check": "pnpm -r --parallel type-check"
   },

@@ -40,12 +40,16 @@ export default function DashboardPage() {
 
     try {
       await api.logout();
-    } catch (err) {
+    } catch {
       // Even if logout fails, redirect to login
-      console.error("Logout error:", err);
+      void 0;
     } finally {
       router.push("/login");
     }
+  }, [router]);
+
+  const handleGoToAdmin = useCallback(() => {
+    router.push("/admin");
   }, [router]);
 
   if (loading) {
@@ -69,13 +73,24 @@ export default function DashboardPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <h1 className="text-xl font-bold text-black">Dashboard</h1>
-            <button
-              onClick={handleLogout}
-              disabled={loggingOut}
-              className="rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-gray-400"
-            >
-              {loggingOut ? "Logging out..." : "Logout"}
-            </button>
+            <div className="flex items-center gap-3">
+              {user.is_admin && (
+                <button
+                  onClick={handleGoToAdmin}
+                  className="rounded-md bg-indigo-600 px-4 py-2 text-white transition-colors hover:bg-indigo-700"
+                >
+                  Admin Panel
+                </button>
+              )}
+
+              <button
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+              >
+                {loggingOut ? "Logging out..." : "Logout"}
+              </button>
+            </div>
           </div>
         </div>
       </nav>

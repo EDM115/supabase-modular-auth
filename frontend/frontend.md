@@ -1,4 +1,4 @@
-Frontend for the authentication API using Next.js 14 App Router. Keep UX minimal, secure, and driven entirely by backend responses.
+Frontend for the authentication API using Next.js 16 App Router. Keep UX minimal, secure, and driven entirely by backend responses.
 
 ## Table of Contents
 
@@ -20,7 +20,7 @@ Frontend for the authentication API using Next.js 14 App Router. Keep UX minimal
 
 ## Tech Stack
 
-- Next.js 14 (App Router)
+- Next.js 16 (App Router)
 - TypeScript
 - Tailwind CSS
 - Fetch API (no Supabase client)
@@ -72,6 +72,19 @@ Frontend for the authentication API using Next.js 14 App Router. Keep UX minimal
   - GET `/auth/me` with credentials.
   - On `401`: redirect to `/login`.
 
+- `/admin`
+  - Admin home.
+  - Requires `/auth/me` success with `user.is_admin === true`.
+  - Non-admin users are redirected to `/dashboard`.
+
+- `/admin/users`
+  - Admin user management table.
+  - Uses `/admin/users`, `/admin/users/:id/*`, and `/admin/users/bulk`.
+
+- `/admin/audit`
+  - Admin audit feed.
+  - Uses `GET /admin/audit-logs`.
+
 - `/logout`
   - POST `/auth/logout` with credentials.
   - On success: redirect to `/login` and clear local UI state.
@@ -83,6 +96,7 @@ Frontend for the authentication API using Next.js 14 App Router. Keep UX minimal
 - Never reuse cached auth state; rely on fresh `/auth/me` when rendering protected areas.
 - Handle rate-limit responses generically ("Please try again later").
 - Prefer `AbortController` for in-flight requests when navigating away.
+- Be resilient to malformed/non-JSON responses from upstreams; fallback to safe generic errors.
 
 ### Google OAuth Example
 
@@ -98,6 +112,7 @@ if (response.success && response.data?.url) {
 - Each form needs: idle, loading (disable submit), success message, generic error message.
 - Show inline validation only for obvious client issues (e.g., empty fields); defer canonical errors to server.
 - Keep layouts minimal and readable; avoid storing any auth data client-side.
+- Keep form controls keyboard-accessible (excluding password visibility toggles) and expose input error state via `aria-invalid` + `aria-describedby`.
 
 ## Error Handling
 

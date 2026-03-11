@@ -61,9 +61,51 @@ http://localhost:3000
 
 All protected endpoints require a valid JWT token stored in an HttpOnly cookie named `auth_token`.
 
+### Admin Authorization
+
+Admin endpoints are protected by authentication + server-side admin checks.
+
+- Source of truth: Supabase `app_metadata`
+- Admin when: `role === "admin"` or `is_admin === true`
+- Enforcement: backend middleware only (client checks are UX only)
+- Rate limiting: higher allowance for admin reads (`GET`) and stricter limit for admin writes (`POST`) to avoid throttling normal panel navigation.
+- Admin-created users now use the regular signup verification flow (verification email is sent by default unless explicitly confirmed).
+- Admin user updates can edit role/admin flags, password, and moderation metadata (`banned`, `ban_reason`, `ban_expires_at`).
+- Admin audit logs are persisted in Supabase table `public.admin_audit_logs`.
+- Retention: backend triggers periodic purge via SQL function `public.admin_purge_audit_logs` (default 180 days).
+- Immutability: audit rows are append-only (updates/deletes blocked except retention purge function).
+
+### Supabase Audit Migration
+
+- Apply: `backend/supabase/migrations/20260311_admin_audit_logs.sql`
+- This migration creates:
+  - `public.admin_audit_logs` table + indexes
+  - mutation-prevention trigger (append-only enforcement)
+  - `public.admin_purge_audit_logs(integer)` retention function
+  - grants restricted to service role for backend access
+
+### OAuth Callback CSRF Protection
+
+- OAuth state validation is handled by Supabase/GoTrue during code exchange.
+- Avoid manually overriding OAuth `state` values in authorization URL parameters.
+
 ---
 
 ### Endpoints
+
+#### Admin Endpoints
+
+- `GET /admin/users`
+- `GET /admin/users/:id`
+- `POST /admin/users/create`
+- `POST /admin/users/:id/update`
+- `POST /admin/users/:id/delete`
+- `POST /admin/users/:id/ban`
+- `POST /admin/users/:id/unban`
+- `POST /admin/users/bulk`
+- `GET /admin/audit-logs`
+
+All admin endpoints require a valid auth cookie and admin privileges.
 
 #### Health Check
 

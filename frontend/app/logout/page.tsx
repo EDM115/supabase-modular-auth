@@ -12,9 +12,9 @@ export default function LogoutPage() {
     const logout = async () => {
       try {
         await api.logout();
-      } catch (err) {
+      } catch {
         // Even if logout fails, redirect to login
-        console.error("Logout error:", err);
+        void 0;
       } finally {
         router.push("/login");
       }
